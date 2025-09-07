@@ -1,76 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLEAR-ly Connected</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png">
-    <style>
-        /* Reset and Variables */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLEAR-ly Connected</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Open Sans', Aptos, Arial, sans-serif; background: #FDFAF5; color: #000; overflow-x: hidden; }
 
-        :root {
-            --primary-burgundy: #64092c;
-            --primary-gold: #dda839;
-            --secondary-gray: #484848;
-            --secondary-blue: #084d78;
-            --bg-dark: #1a1a1a;
-            --bg-light: #f5f5f5;
-            --card-bg: #ffffff;
-            --text-color: #000;
-            --text-light: #666;
-            --border-color: #e0e0e0;
-            --shadow: 0 8px 32px rgba(0,0,0,0.1);
-            --shadow-hover: 0 16px 48px rgba(0,0,0,0.15);
-        }
+    /* Dashboard */
+    .dashboard { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
 
-        body {
-            font-family: 'Open Sans', Aptos, Arial, sans-serif;
-            background: #FDFAF5;
-            color: var(--text-color);
-            overflow-x: hidden;
-        }
+    /* Sidebar */
+    .sidebar {
+      background: #f3dfb5;
+      padding: 20px;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+    .sidebar.mobile {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 220px;
+      transform: translateX(-100%);
+    }
+    .sidebar.mobile.open { transform: translateX(0); }
 
-        /* Mobile Menu Toggle */
-        .mobile-menu-toggle {
-            display: none;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 3000;
-            background: var(--primary-burgundy);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            box-shadow: var(--shadow);
-        }
+    .logo-section { text-align: center; margin-bottom: 20px; }
+    .logo { width: 70px; height: 70px; background: url('https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png') center/contain no-repeat; margin: 0 auto 10px; }
+    .org-name { font-size: 1rem; font-weight: 600; }
+    .tagline { font-size: 0.85rem; opacity: 0.8; }
 
-        /* Dashboard Layout */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
+    .nav-menu { list-style: none; margin-top: 20px; }
+    .nav-link { display: block; padding: 12px 15px; color: #000; text-decoration: none; border-radius: 8px; transition: 0.3s; }
+    .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.5); }
 
-        /* Sidebar Navigation */
-        .sidebar {
-            background: #f3dfb5;
-            color: white;
-            padding: 20px;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-            position: relative;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
+    /* Mobile Menu Button */
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 15px; left: 15px;
+      background: #64092c;
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      font-size: 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      z-index: 1100;
+    }
+
+    /* Overlay for sidebar on mobile */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 900;
+    }
+    .overlay.active { display: block; }
+
+    /* Main */
+    .main-content { background: #FDFAF5; padding: 20px; overflow: hidden; }
+    .section-header { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
+    .section-title { font-size: 2rem; color: #64092c; }
+    .section-subtitle { font-size: 1rem; color: #555; }
+
+    /* Video */
+    .video-wrapper { position: relative; padding-top: 56.25%; height: 0; margin-bottom: 20px; }
+    .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+    /* Tabs */
+    .tab-container { background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden; }
+    .tab-nav { display: flex; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn { flex: 1; padding: 12px; border: none; background: #f9f9f9; cursor: pointer; font-weight: 600; transition: 0.3s; white-space: nowrap; }
+    .tab-btn.active { background: #fff; color: #64092c; border-bottom: 3px solid #dda839; }
+
+    .tab-content { display: none; padding: 15px; }
+    .tab-content.active { display: block; }
+    @keyframes slideInLeft { from { transform: translateX(-50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideInRight { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* Cards */
+    .interactive-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    .interactive-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; }
+    .interactive-card:hover { transform: translateY(-4px); }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin: 20px 0; }
+    .stat-card { background: #fff; border-radius: 10px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    .stat-number { font-size: 1.8rem; font-weight: 700; color: #64092c; }
+    .stat-label { font-size: 0.9rem; color: #666; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1200; align-items: center; justify-content: center; padding: 15px; }
+    .modal.active { display: flex; }
+    .modal-content { background: #fff; border-radius: 12px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; padding: 20px; animation: slideIn 0.3s ease; touch-action: none; }
+    @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-close { position: absolute; top: 10px; right: 10px; background: #64092c; color: #fff; border: none; font-size: 1.5rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+
+    /* Responsive */
+    @media (max-width: 1024px) { .dashboard { grid-template-columns: 220px 1fr; } }
+    @media (max-width: 768px) {
+      .dashboard { grid-template-columns: 1fr; }
+      .sidebar { grid-column: 1 / 2; }
+      .sidebar.mobile { display: block; }
+      .menu-toggle { display: block; }
+      .main-content { padding-top: 60px; }
+    }
+    @media (max-width: 480px) {
+      .section-title { font-size: 1.5rem; }
+      .section-subtitle { font-size: 0.9rem; }
+      .tab-btn { font-size: 0.85rem; padding: 10px; }
+      .modal-content { padding: 15px; border-radius: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <nav class="sidebar mobile" id="sidebar">
+      <div class="logo-section">
+        <div class="logo"></div>
+        <div class="org-name">CLEAR</div>
+        <div class="tagline">Promoting Regulatory Excellence</div>
+      </div>
+      <ul class="nav-menu">
+        <li><a class="nav-link active" href="#" data-section="welcome">🏠 Welcome Hub</a></li>
+        <li><a class="nav-link" href="#" data-section="conferences">📅 Conferences</a></li>
+        <li><a class="nav-link" href="#" data-section="learning">🎓 Learning</a></li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <section class="content-section active" id="welcome">
+        <div class="section-header">
+          <h1 class="section-title">CLEAR-ly Connected</h1>
+          <h2 class="section-subtitle">Getting the Most from the CLEAR Community</h2>
+        </div>
+        <div class="video-wrapper">
+          <iframe src="https://player.vimeo.com/video/1115627510?h=1bdfdfb135" allow="fullscreen; picture-in-picture"></iframe>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-container" id="tabs">
+          <div class="tab-nav">
+            <button class="tab-btn active" data-tab="About">About Us</button>
+            <button class="tab-btn" data-tab="Mission">Mission</button>
+            <button class="tab-btn" data-tab="History">History</button>
+          </div>
+          <div class="tab-content active" id="About"><p>About CLEAR content...</p></div>
+          <div class="tab-content" id="Mission"><p>Mission content...</p></div>
+          <div class="tab-content" id="History"><p>History content...</p></div>
+        </div>
+
+        <!-- Cards -->
+        <div class="interactive-grid">
+          <div class="interactive-card" onclick="showModal('modal1')">
+            <h3>Conference 2025</h3>
+            <p>Tap for details</p>
+          </div>
+          <div class="interactive-card" onclick="showModal('modal2')">
+            <h3>Conference 2026</h3>
+            <p>Tap for details</p>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card"><span class="stat-number">10,000+</span><div class="stat-label">Members</div></div>
+          <div class="stat-card"><span class="stat-number">45</span><div class="stat-label">Years</div></div>
+          <div class="stat-card"><span class="stat-number">10+</span><div class="stat-label">Countries</div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal" id="modal1">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('modal1')">×</button>
+      <h2>2025 Annual Conference</h2>
+      <p>Details about the 2025 event.</p>
+    </div>
+  </div>
+  <div class="modal" id="modal2">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('modal2')">×</button>
+      <h2>2026 Annual Conference</h2>
+      <p>Details about the 2026 event.</p>
+    </div>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const navLinks = document.querySelectorAll('.nav-link');
+    let sidebarOpen = false;
+
+    function toggleMenu(forceClose = false) {
+      if (forceClose) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        sidebarOpen = false;
+        return;
+      }
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+      sidebarOpen = sidebar.classList.contains('open');
+    }
+
+    // Close sidebar when nav link tapped (mobile only)
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          toggleMenu(true);
         }
+      });
+    });
+
+    function showModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // Tab switching with animation
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    let lastIndex = 0;
+
+    function switchToTab(newIndex) {
+      if (newIndex < 0 || newIndex >= tabButtons.length || newIndex === lastIndex) return;
+      const direction = newIndex > lastIndex ? 'Right' : 'Left';
+
+      tabButtons.forEach(b => b.classList.remove('active'));
+      tabContents.forEach(c => c.classList.remove('active'));
+
+      tabButtons[newIndex].classList.add('active');
+      tabContents[newIndex].classList.add('active');
+      tabContents[newIndex].style.animation = `slideIn${direction} 0.4s ease`;
+
+      lastIndex = newIndex;
+    }
+
+    tabButtons.forEach((btn, i) => { btn.addEventListener('click', () => switchToTab(i)); });
+
+    // Swipe utility
+    function addSwipeListener(element, callbacks) {
+      let startX, startY;
+      element.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      });
+      element.addEventListener('touchend', e => {
+        if (!startX || !startY) return;
+        let dx = e.changedTouches[0].clientX - startX;
+        let dy = e.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+          dx > 0 ? callbacks.onSwipeRight?.() : callbacks.onSwipeLeft?.();
+        }
+        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 50) {
+          dy > 0 ? callbacks.onSwipeDown?.() : callbacks.onSwipeUp?.();
+        }
+        startX = startY = null;
+      });
+    }
+
+    // Swipe tabs
+    const tabContainer = document.getElementById('tabs');
+    addSwipeListener(tabContainer, {
+      onSwipeLeft: () => switchToTab(lastIndex + 1),
+      onSwipeRight: () => switchToTab(lastIndex - 1)
+    });
+
+    // Swipe modals (close on swipe down)
+    document.querySelectorAll('.modal').forEach(modal => {
+      addSwipeListener(modal.querySelector('.modal-content'), {
+        onSwipeDown: () => modal.classList.remove('active')
+      });
+      modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+    });
+
+    // Swipe to open/close sidebar (mobile only)
+    addSwipeListener(document.body, {
+      onSwipeRight: () => {
+        if (window.innerWidth <= 768 && !sidebarOpen && event.changedTouches[0].clientX < 30) {
+          toggleMenu();
+        }
+      },
+      onSwipeLeft: () => {
+        if (window.innerWidth <= 768 && sidebarOpen) {
+          toggleMenu(true);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
 
         .logo-section {
             text-align: center;
